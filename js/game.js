@@ -10,7 +10,7 @@ var sprites = {
 };
 
 var enemies = {
-    basic: { x: 100, y: -50, sprite: 'enemy_purple', B: 100, C: 2 , E: 100 }
+    basic: { x: 100, y: -50, sprite: 'enemy_purple', B: 100, C: 2, E: 100 }
 };
 
 
@@ -98,109 +98,86 @@ var Starfield = function (speed, opacity, numStars, clear) {
     }
 };
 
+//---------------------------
+// PlayerShip
 var PlayerShip = function () {
-    this.w = SpriteSheet.map['ship'].w;
-    this.h = SpriteSheet.map['ship'].h;
+
+    this.setup('ship', { vx: 0, frame: 1, reloadTime: 0.25, maxVel: 200 });
+    this.reload = this.reloadTime;
     this.x = Game.width / 2 - this.w / 2;
     this.y = Game.height - 10 - this.h;
-    this.vx = 0;
-    this.reloadTime = 0.25; // Quarter second reload
-    this.reload = this.reloadTime;
-
 
     this.step = function (dt) {
-        this.maxVel = 200;
-        this.step = function (dt) {
-            if (Game.keys['left']) {
-                this.vx = -this.maxVel;
-            }
-            else if (Game.keys['right']) {
-                this.vx = this.maxVel;
-            }
-            else {
-                this.vx = 0;
-            }
-            this.x += this.vx * dt;
-            if (this.x < 0) {
-                this.x = 0;
-            }
-            else if (this.x > Game.width - this.w) {
-                this.x = Game.width - this.w;
-            }
-
-            this.reload -= dt;
-            if (Game.keys['fire'] && this.reload < 0) {
-                Game.keys['fire'] = false;
-                this.reload = this.reloadTime;
-                this.board.add(new PlayerMissile(this.x, this.y + this.h / 2));
-                this.board.add(new PlayerMissile(this.x + this.w, this.y + this.h / 2));
-            }
+        if (Game.keys['left']) {
+            this.vx = -this.maxVel;
         }
-    };
-    this.draw = function (ctx) {
-        SpriteSheet.draw(ctx, 'ship', this.x, this.y, 1);
+        else if (Game.keys['right']) {
+            this.vx = this.maxVel;
+        }
+        else {
+            this.vx = 0;
+        }
+        this.x += this.vx * dt;
+        if (this.x < 0) {
+            this.x = 0;
+        }
+        else if (this.x > Game.width - this.w) {
+            this.x = Game.width - this.w
+        }
+        this.reload -= dt;
+        if (Game.keys['fire'] && this.reload < 0) {
+            this.reload = this.reloadTime;
+            this.board.add(new PlayerMissile(this.x, this.y + this.h / 2));
+            this.board.add(new PlayerMissile(this.x + this.w, this.y + this.h / 2));
+        }
     }
 };
+PlayerShip.prototype = new Sprite();
 
+//---------------------------
+// PlayerMissile
 var PlayerMissile = function (x, y) {
-    this.w = SpriteSheet.map['missile'].w;
-    this.h = SpriteSheet.map['missile'].h;
-// Center the missile on x
+
+    this.setup('missile', { vy: -700 });
     this.x = x - this.w / 2;
-// Use the passed in y as the bottom of the missile
     this.y = y - this.h;
-    this.vy = -700;
 };
+PlayerMissile.prototype = new Sprite();
 PlayerMissile.prototype.step = function (dt) {
+
     this.y += this.vy * dt;
     if (this.y < -this.h) {
         this.board.remove(this);
     }
 };
-PlayerMissile.prototype.draw = function (ctx) {
-    SpriteSheet.draw(ctx, 'missile', this.x, this.y);
-};
 
+//---------------------------
+// Enemy
 var Enemy = function (blueprint, override) {
-    var baseParameters = { A: 0, B: 0, C: 0, D: 0,
-        E: 0, F: 0, G: 0, H: 0 };
-// Set all the base parameters to 0
-    for (var prop in baseParameters) {
-        this[prop] = baseParameters[prop];
-    }
-// Copy of all the attributes from the blueprint
-    for (prop in blueprint) {
-        this[prop] = blueprint[prop];
-    }
-// Copy of all the attributes from the override, if present
-    if (override) {
-        for (prop in override) {
-            this[prop] = override[prop];
-        }
-    }
-    this.w = SpriteSheet.map[this.sprite].w;
-    this.h = SpriteSheet.map[this.sprite].h;
-    // current lifetime
-    this.t = 0;
+    this.merge(this.baseParameters);
+    this.setup(blueprint.sprite, blueprint);
+    this.merge(override);
 };
+Enemy.prototype = new Sprite();
+Enemy.prototype.baseParameters = { A: 0, B: 0, C: 0, D: 0,
+    E: 0, F: 0, G: 0, H: 0,
+    t: 0 };
 
 Enemy.prototype.step = function (dt) {
     this.t += dt;
+
     this.vx = this.A + this.B * Math.sin(this.C * this.t + this.D);
     this.vy = this.E + this.F * Math.sin(this.G * this.t + this.H);
+
     this.x += this.vx * dt;
     this.y += this.vy * dt;
+
     if (this.y > Game.height ||
         this.x < -this.w ||
         this.x > Game.width) {
         this.board.remove(this);
     }
 };
-
-Enemy.prototype.draw = function (ctx) {
-    SpriteSheet.draw(ctx, this.sprite, this.x, this.y);
-};
-
 
 
 
