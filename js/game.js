@@ -1,3 +1,11 @@
+//object types for collision detection
+var OBJECT_PLAYER = 1,
+    OBJECT_PLAYER_PROJECTILE = 2,
+    OBJECT_ENEMY = 4,
+    OBJECT_ENEMY_PROJECTILE = 8,
+    OBJECT_POWERUP = 16;
+
+
 //the sprites are passed to th Game,initialize func, then from there to the SpriteSheet.load method
 var sprites = {
     ship: { sx: 0, sy: 0, w: 39, h: 42, frames: 1 },
@@ -133,20 +141,27 @@ var PlayerShip = function () {
     }
 };
 PlayerShip.prototype = new Sprite();
+PlayerShip.prototype.type = OBJECT_PLAYER;
+
 
 //---------------------------
 // PlayerMissile
 var PlayerMissile = function (x, y) {
 
-    this.setup('missile', { vy: -700 });
+    this.setup('missile', { vy: -700, damage: 10 });
     this.x = x - this.w / 2;
     this.y = y - this.h;
 };
 PlayerMissile.prototype = new Sprite();
+PlayerMissile.prototype.type = OBJECT_PLAYER_PROJECTILE;
 PlayerMissile.prototype.step = function (dt) {
 
     this.y += this.vy * dt;
-    if (this.y < -this.h) {
+    var collision = this.board.collide(this, OBJECT_ENEMY);
+    if (collision) {
+        collision.hit(this.damage);
+        this.board.remove(this);
+    } else if (this.y < -this.h) {
         this.board.remove(this);
     }
 };
@@ -159,6 +174,7 @@ var Enemy = function (blueprint, override) {
     this.merge(override);
 };
 Enemy.prototype = new Sprite();
+Enemy.prototype.type = OBJECT_ENEMY;
 Enemy.prototype.baseParameters = { A: 0, B: 0, C: 0, D: 0,
     E: 0, F: 0, G: 0, H: 0,
     t: 0 };
@@ -171,6 +187,12 @@ Enemy.prototype.step = function (dt) {
 
     this.x += this.vx * dt;
     this.y += this.vy * dt;
+
+    var collision = this.board.collide(this,OBJECT_PLAYER);
+    if(collision) {
+        collision.hit(this.damage);
+        this.board.remove(this);
+    }
 
     if (this.y > Game.height ||
         this.x < -this.w ||

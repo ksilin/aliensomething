@@ -19,7 +19,7 @@ var Game = new function () {
     };
 
     // Handle Input
-    var KEY_CODES = { 37: 'left', 39: 'right', 32: 'fire' };
+    var KEY_CODES = { 37: 'left', 38: 'up', 39: 'right', 40: 'down', 32: 'fire' };
     this.keys = {};
 
     this.setupInput = function () {
@@ -44,6 +44,12 @@ var Game = new function () {
     this.loop = function () {
         //we are just assuming that this is our frame length in ms., based on the timeout settings
         var dt = 30 / 1000;
+
+        //drawing a black rect over the whole screen
+        var backupStyle = Game.ctx.fillStyle;
+        Game.ctx.fillStyle = "#000";
+        Game.ctx.clearRect(0, 0, Game.width, Game.height);
+        Game.ctx.fillStyle = backupStyle;
 
         for (var i = 0, len = boards.length; i < len; i++) {
             if (boards[i]) {
@@ -213,3 +219,8 @@ Sprite.prototype.merge = function(props) {
 Sprite.prototype.draw = function(ctx) {
     SpriteSheet.draw(ctx,this.sprite,this.x,this.y,this.frame);
 };
+
+Sprite.prototype.hit = function(damage) {
+    this.board.remove(this);
+};
+
