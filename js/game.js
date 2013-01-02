@@ -13,12 +13,12 @@ var sprites = {
     enemy_purple: { sx: 37, sy: 0, w: 42, h: 43, frames: 1 },
     enemy_bee: { sx: 79, sy: 0, w: 37, h: 43, frames: 1 },
     enemy_ship: { sx: 116, sy: 0, w: 42, h: 43, frames: 1 },
-    enemy_circle: { sx: 158, sy: 0, w: 32, h: 33, frames: 1 }
-
+    enemy_circle: { sx: 158, sy: 0, w: 32, h: 33, frames: 1 },
+    explosion: { sx: 0, sy: 64, w: 64, h: 64, frames: 12 }
 };
 
 var enemies = {
-    basic: { x: 100, y: -50, sprite: 'enemy_purple', B: 100, C: 2, E: 100 }
+    basic: { x: 100, y: -50, sprite: 'enemy_purple', B: 100, C: 2, E: 100, health: 20 }
 };
 
 
@@ -188,8 +188,8 @@ Enemy.prototype.step = function (dt) {
     this.x += this.vx * dt;
     this.y += this.vy * dt;
 
-    var collision = this.board.collide(this,OBJECT_PLAYER);
-    if(collision) {
+    var collision = this.board.collide(this, OBJECT_PLAYER);
+    if (collision) {
         collision.hit(this.damage);
         this.board.remove(this);
     }
@@ -200,6 +200,31 @@ Enemy.prototype.step = function (dt) {
         this.board.remove(this);
     }
 };
+Enemy.prototype.hit = function (damage) {
+    this.health -= damage;
+    if (this.health <= 0) {
+        if (this.board.remove(this)) {
+            this.board.add(new Explosion(this.x + this.w / 2,
+                this.y + this.h / 2));
+        }
+    }
+};
+
+var Explosion = function (centerX, centerY) {
+    this.setup('explosion', { frame: 0 });
+    this.x = centerX - this.w / 2;
+    this.y = centerY - this.h / 2;
+    this.subFrame = 0;
+};
+Explosion.prototype = new Sprite();
+Explosion.prototype.step = function (dt) {
+    this.frame = Math.floor(this.subFrame++ / 3);
+    if (this.subFrame >= 36) {
+        this.board.remove(this);
+    }
+};
+
+
 
 
 
