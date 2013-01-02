@@ -130,8 +130,10 @@ var GameBoard = function () {
     };
     // Mark an object for removal
     this.remove = function (obj) {
-        var wasStillAlive = this.removed.indexOf(obj) != -1;
+        console.log("board.remove called");
+        var wasStillAlive = this.objects.indexOf(obj) != -1;
         if (wasStillAlive) {
+            console.log("was still alive, so removing");
             this.removed.push(obj);
         }
         return wasStillAlive;
@@ -144,8 +146,10 @@ var GameBoard = function () {
 // Remove objects marked for removal from the list
     this.finalizeRemoved = function () {
         for (var i = 0, len = this.removed.length; i < len; i++) {
+            console.log("removing " + len + " objects");
             var idx = this.objects.indexOf(this.removed[i]);
             if (idx != -1) {
+                console.log("removing from objects: " + this);
                 this.cnt[this.removed[i].type]--;
                 this.objects.splice(idx, 1);
             }
@@ -221,6 +225,7 @@ Sprite.prototype.draw = function(ctx) {
 };
 
 Sprite.prototype.hit = function(damage) {
+    console.log("hit");
     this.board.remove(this);
 };
 
