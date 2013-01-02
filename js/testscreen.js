@@ -26,6 +26,8 @@ var startGame = function () {
 
     var board = new GameBoard();
     board.add(new PlayerShip());
+    board.add(new WireframeSprite(100, 100));
+    board.add(new WireframeSprite(150, 150));
     Game.setBoard(3, board);
 };
 
@@ -79,8 +81,6 @@ PlayerShip.prototype = new Sprite();
 PlayerShip.prototype.type = OBJECT_PLAYER;
 
 
-
-
 //---------------------------
 // PlayerMissile
 var PlayerMissile = function (x, y) {
@@ -102,6 +102,37 @@ PlayerMissile.prototype.step = function (dt) {
         this.board.remove(this);
     }
 };
+
+var WireframeSprite = function (x, y) {
+
+    this.x = x;
+    this.y = y;
+
+    this.w = 100;
+    this.h = 100;
+
+    this.colliding = false;
+
+    this.step = function (dt) {
+        this.colliding = false;
+    };
+    this.hit = function (damage) {
+        this.colliding = true;
+    };
+
+    this.draw = function (ctx) {
+
+        if (this.colliding) {
+            ctx.fillStyle = "#FF0000";
+        } else {
+            ctx.fillStyle = "#FFFFFF";
+        }
+        ctx.fillRect(this.x, this.y, this.w, this.h);
+        ctx.fillStyle = "#FFFF00";
+        ctx.strokeRect(this.x, this.y, this.w, this.h);
+    };
+};
+WireframeSprite.prototype.type = OBJECT_ENEMY;
 
 
 

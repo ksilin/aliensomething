@@ -197,7 +197,7 @@ var GameBoard = function () {
     };
 };
 
-var Sprite = function() { }
+var Sprite = function() { };
 Sprite.prototype.setup = function(sprite,props) {
 
     this.sprite = sprite;
