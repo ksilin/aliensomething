@@ -113,10 +113,9 @@ var WireframeSprite = function (x, y) {
 
     this.colliding = false;
 
-    this.step = function (dt) {
-        this.colliding = false;
-    };
-    this.hit = function (damage) {
+    this.step = function(dt){this.colliding = false;
+     };
+    this.hit = function(damage){
         this.colliding = true;
     };
 
